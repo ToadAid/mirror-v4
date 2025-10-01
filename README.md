@@ -10,6 +10,10 @@ Guard/Guide → Retriever (temporal + predictive) → Synthesis (causal weaving)
 
 ---
 
+👉 **See [COMMUNITY.md](COMMUNITY.md)** — why scrolls are the **heart of the Mirror**, and how you can forge and share your own lore to help the fallen frogs.  
+
+---
+
 ## Quickstart
 
 ### Docker
