@@ -60,4 +60,4 @@ Server defaults to `http://localhost:8080`.
 ---
 
 ## License
-MIT © <Your Org/Name>
+MIT © <ToadAid>
