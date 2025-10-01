@@ -32,7 +32,7 @@ python -m tobyworld_v4.api.server
 
 ```
 Or simply:
-./scripts/run-local.sh
+./scripts/run.sh
 
 Server defaults to `http://localhost:8080`. 
 
