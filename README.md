@@ -29,9 +29,12 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -U pip && pip install -r requirements.txt
 cp .env.example .env
 python -m tobyworld_v4.api.server
-```
 
-Server defaults to `http://localhost:8080`.
+```
+Or simply:
+./scripts/run-local.sh
+
+Server defaults to `http://localhost:8080`. 
 
 ---
 
