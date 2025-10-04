@@ -23,7 +23,6 @@ logs/
 *.log
 
 # Local artifacts
-lore-scrolls/
 data/
 tmp/
 *.db
@@ -36,3 +35,9 @@ tmp/
 *.db-shm
 /mirror-v4.db
 /memori.db
+*.db
+*.db-wal
+*.db-shm
+lore-scrolls.zip
+/memori.db
+/mirror-v4.db
