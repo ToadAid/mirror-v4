@@ -55,7 +55,8 @@ LOCAL_MODEL_URL=http://127.0.0.1:1234/v1
 python -m tobyworld_v4.api.server
 ```
 
-Mirror v4 runs at: `http://localhost:8080`  
+Mirror v4 runs at: `[http://localhost](http://127.0.0.1/web/index.html)`  
+Health: [http://localhost:8080/web/health.html](http://127.0.0.1:8080/web/health.html)
 Check: `curl http://localhost:8080/heartbeat`
 
 ---
