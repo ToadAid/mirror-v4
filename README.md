@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # mirror-v4
 Mirror v4 — The Living Scrolls Engine. An agentic RAG pipeline with cadence guardrails, memory, resonance, and lucidity for Tobyworld.
 
@@ -69,3 +70,15 @@ Server defaults to `http://localhost:8080`.
 ## License
 MIT © ToadAid
 
+=======
+# Mirror V4 — The Covenant That Teaches
+
+Fresh, standalone V4 so V3 stays untouched.
+
+## Quickstart
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+export PYTHONPATH=src:$PYTHONPATH
+uvicorn tobyworld_v4.api.server:app --host 0.0.0.0 --port 8084 --reload
+>>>>>>> a145a34 (Mirror V4 initial public release — portable paths, snippet helper, web miniapp)

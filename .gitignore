@@ -1,0 +1,28 @@
+# Python / venv
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# OS cruft
+.DS_Store
+
+# Local env + secrets
+.env
+.env.*
+!.env.example
+
+# Local databases / state
+*.db
+*.db-journal
+/mirror-v4.db
+/memori.db
+
+# Logs, caches
+logs/
+*.log
+
+# Local artifacts
+lore-scrolls/
+data/
+tmp/

@@ -1,0 +1,204 @@
+/* existing styles kept intact */
+:root {
+  --bg: #0b0f0c;
+  --card: #111713;
+  --ink: #dfe7e2;
+  --muted: #8da396;
+  --ok: #48d597;
+  --warn: #ffcc66;
+  --bad: #ff6b6b;
+  --accent: #49a078;
+  --grid: 14px;
+  --radius: 16px;
+  --ring: rgba(73,160,120,0.35);
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 800px at 15% 10%, rgba(73,160,120,0.06), transparent 50%),
+    radial-gradient(1000px 700px at 85% 0%, rgba(100,180,150,0.04), transparent 55%),
+    var(--bg);
+  color: var(--ink);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  line-height: 1.4;
+  padding: calc(var(--grid)*2);
+}
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--grid);
+  margin-bottom: calc(var(--grid)*2);
+}
+h1 { font-size: 24px; margin: 0; letter-spacing: 0.2px; }
+.muted { color: var(--muted); }
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: calc(var(--grid)*1.2);
+  align-items: stretch;
+}
+.card {
+  position: relative;           /* NEW: own stacking context */
+  z-index: 1;                    /* NEW: draw above earlier sections */
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  padding: calc(var(--grid)*1.2);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  backdrop-filter: blur(4px);
+}
+.card h3 {
+  margin: 0 0 var(--grid) 0;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+.stat { font-size: 28px; font-weight: 700; }
+
+.pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+}
+.ok { color: var(--ok); }
+.warn { color: var(--warn); }
+.bad { color: var(--bad); }
+
+.grid-4  { grid-column: span 4; }
+.grid-6  { grid-column: span 6; }
+.grid-8  { grid-column: span 8; }
+.grid-12 { grid-column: span 12; }
+
+.kv {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.kv b { color: var(--ink); font-weight: 600; }
+
+/* --- Cadence bars (label | progress) --- */
+.bar{
+  display: grid;                /* NEW: proper layout for label + bar */
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+.bar label{
+  color: rgba(255,255,255,.88);
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+.bar-outer{
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  outline: 1px solid rgba(255,255,255,0.06);
+}
+.bar-inner{
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;                      /* JS sets this */
+  background: linear-gradient(90deg, var(--accent), #53d6a4);
+  transition: width .35s ease;    /* smooth updates */
+}
+
+/* Old bullet style bar no longer used, keep harmless just in case */
+.bar > i { display:none; }
+
+/* --- Modules grid --- */
+.modules {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: calc(var(--grid)*1.2);
+}
+.module {
+  padding: calc(var(--grid));
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(20,26,22,0.7);
+}
+.module h4 { margin: 0 0 6px 0; font-size: 14px; }
+.module .desc { color: var(--muted); font-size: 12px; min-height: 32px; }
+.module .status {
+  margin-top: 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 3px var(--ring); }
+.dot.ok { background: var(--ok); }
+.dot.warn { background: var(--warn); }
+.dot.bad { background: var(--bad); }
+
+/* --- Flow diagram styling --- */
+.flow-wrap{
+  position: relative;            /* NEW */
+  overflow: hidden;              /* NEW: clip long feedback arrow */
+  z-index: 0;                    /* NEW */
+  margin-top: 4px;
+}
+.flow{
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;          /* NEW: SVG can't block clicks below */
+}
+.node { fill: url(#g), rgba(255,255,255,0.02); stroke: rgba(255,255,255,0.12); }
+.label { font: 600 14px 'Inter', system-ui, sans-serif; fill: var(--ink); }
+.sublabel { font: 12px 'Inter', system-ui, sans-serif; fill: var(--muted); }
+.arrow { stroke: var(--accent); stroke-width: 2; }
+.node.ok { stroke: var(--ok); }
+.node.warn { stroke: var(--warn); }
+.node.bad { stroke: var(--bad); }
+.flow-legend { margin-top: 10px; font-size: 12px; color: var(--muted); }
+
+/* Simple list styling used in side cards */
+.list{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink);
+}
+.list li{ color: var(--ink); }
+.list li span.muted{ color: var(--muted); }
+
+footer {
+  margin-top: calc(var(--grid)*2);
+  display: flex; gap: var(--grid);
+  align-items: center; justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+a { color: var(--ok); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+@media (max-width: 1100px) {
+  .modules { grid-template-columns: repeat(2, 1fr); }
+  .grid-8, .grid-6, .grid-4 { grid-column: span 12; }
+}
+
+/* add fill:none so open paths don’t paint a big triangle */
+.arrow {
+  stroke: var(--accent);
+  stroke-width: 2;
+  fill: none;                 /* <-- key fix */
+}

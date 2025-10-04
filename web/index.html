@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lore Guardian — MiniApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    body { background: #111; color: #eee; font-family: sans-serif; }
+    .card { background: #1e1e1e; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; }
+    .btn { background: #333; padding: 0.5rem 1rem; border-radius: 0.25rem; margin-right: 0.5rem; }
+    .btn:hover { background: #444; }
+    textarea { width: 100%; height: 6rem; background: #222; color: #eee; border: none; padding: 0.5rem; border-radius: 0.25rem; }
+    input { background: #222; color: #eee; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; width: 100%; }
+    .answer { white-space: pre-wrap; background: #181818; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem; }
+  </style>
+</head>
+<body class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Lore Guardian — MiniApp</h1>
+  <p class="text-sm mb-6">static test UI v0.5 (shows Q + copy Q+A)</p>
+
+  <!-- Settings -->
+  <div class="card">
+    <h2 class="font-semibold mb-2">Settings</h2>
+    <label class="text-sm">API Key (x-api-key)</label>
+    <input id="apikey" placeholder="supersecret" value="supersecret" />
+    <div class="flex mt-2">
+      <button class="btn" onclick="saveKey()">Save</button>
+      <button class="btn" onclick="checkHealth()">Health</button>
+      <button class="btn" onclick="diag()">Diag</button>
+      <button class="btn" onclick="clearBox()">Clear</button>
+      <span id="healthstatus" class="ml-2 text-green-400">health:ok</span>
+    </div>
+  </div>
+
+  <!-- Ask Section -->
+  <div class="card">
+    <h2 class="font-semibold mb-2">Ask</h2>
+    <textarea id="question" placeholder="Ask the Lore Guardian..."></textarea>
+    <div class="mt-2">
+      <button class="btn" onclick="ask()">Ask</button>
+      <button class="btn" onclick="copyAnswer()">Copy A</button>
+      <button class="btn" onclick="copyQA()">Copy Q+A</button>
+    </div>
+    <div class="mt-2">
+      <div><strong>Question</strong></div>
+      <div id="qout" class="mt-1 text-yellow-400"></div>
+      <div><strong>Answer</strong></div>
+      <div id="aout" class="answer"></div>
+    </div>
+  </div>
+
+  <p class="text-xs mt-8">This UI calls <code>/api/healthz</code>, <code>/api/diag</code>, and <code>/api/ask</code> on the same host (via nginx proxy to 127.0.0.1:8080).</p>
+
+  <script>
+    let key = "supersecret";
+    function saveKey() {
+      key = document.getElementById("apikey").value;
+      alert("Key saved: " + key);
+    }
+    async function ask() {
+      const q = document.getElementById("question").value;
+      document.getElementById("qout").innerText = q;
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": key },
+        body: JSON.stringify({ question: q })
+      });
+      const data = await res.json();
+      document.getElementById("aout").innerText = data.answer || JSON.stringify(data);
+    }
+    async function checkHealth() {
+      const res = await fetch("/api/healthz");
+      const data = await res.json();
+      document.getElementById("healthstatus").innerText = "health:" + data.status;
+    }
+    async function diag() {
+      const res = await fetch("/api/diag");
+      const data = await res.json();
+      alert("Diag: " + JSON.stringify(data));
+    }
+    function clearBox() {
+      document.getElementById("question").value = "";
+      document.getElementById("qout").innerText = "";
+      document.getElementById("aout").innerText = "";
+    }
+    function copyAnswer() {
+      navigator.clipboard.writeText(document.getElementById("aout").innerText);
+    }
+    function copyQA() {
+      const text = "Q: " + document.getElementById("qout").innerText + "\nA: " + document.getElementById("aout").innerText;
+      navigator.clipboard.writeText(text);
+    }
+  </script>
+</body>
+</html>

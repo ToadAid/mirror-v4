@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mirror V4 · Health</title>
+  <style>
+    :root {
+      --bg: #0b0f14; --panel: #121822; --muted: #8aa0b4; --ok: #41d38a; --warn: #ffb020; --bad: #ff5f5f;
+      --accent: #79b8ff; --border: #1c2633;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 16px;
+      background: radial-gradient(1200px 600px at 10% -10%, #172233 0%, #0b0f14 55%),
+                  radial-gradient(800px 600px at 120% 20%, #142032 0%, #0b0f14 60%);
+      color: #e8eef6; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    h1 { margin: 4px 0 16px; font-weight: 700; letter-spacing: 0.2px; }
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(12, 1fr); }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
+      border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-6 { grid-column: span 6; }
+    .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
+    .kpi { font-size: 28px; font-weight: 800; }
+    .muted { color: var(--muted); }
+    .row { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+    .tag { font-family: var(--mono); font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); background: #0f1621; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--border); }
+    code, pre { font-family: var(--mono); font-size: 12px; }
+    .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+    .pill { padding: 2px 6px; border-radius: 6px; border: 1px solid var(--border); }
+    .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .small { font-size: 12px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    canvas { width: 100%; height: 220px; display:block; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>🪞 Mirror V4 · Health</h1>
+
+  <div class="grid">
+    <div class="card span-3">
+      <div class="row"><div>Uptime</div></div>
+      <div id="uptime" class="kpi">—</div>
+      <div class="muted small" id="app-name">—</div>
+    </div>
+
+    <div class="card span-3">
+      <div class="row"><div>Scrolls Loaded</div></div>
+      <div class="kpi" id="scrolls">—</div>
+      <div class="small muted" id="index-last">—</div>
+    </div>
+
+    <div class="card span-3">
+      <div class="row"><div>Cadence</div></div>
+      <div class="kpi" id="cadence-rate">—</div>
+      <div class="small muted" id="cadence-pcts">—</div>
+    </div>
+
+    <div class="card span-3">
+      <div class="row"><div>GPU</div></div>
+      <div class="kpi" id="gpu-count">—</div>
+      <div class="small muted" id="gpu-avg">—</div>
+    </div>
+
+    <div class="card span-6">
+      <div class="row"><strong>RAG (last hits)</strong></div>
+      <table>
+        <thead><tr><th>#</th><th>ID</th><th>Title</th><th>Score</th></tr></thead>
+        <tbody id="rag-tbody"><tr><td colspan="4" class="muted">—</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- Memori card - will be hidden if Memori is disabled -->
+    <div class="card span-6" id="memori-card">
+      <div class="row"><strong>Memori Status</strong></div>
+      <div id="memori-status" class="kpi">—</div>
+      <div class="small muted" id="memori-details">—</div>
+    </div>
+
+    <div class="card span-12">
+      <div class="row"><strong>Routing · Requests per Endpoint</strong></div>
+      <canvas id="routing-canvas" width="1200" height="220"></canvas>
+      <div id="routing-legend" class="small muted">—</div>
+    </div>
+
+    <div class="card span-12">
+      <div class="row"><strong>Env & Safeguards</strong></div>
+      <div class="flex small" id="env-tags"></div>
+      <pre id="safeguards" class="small"></pre>
+    </div>
+
+    <div class="card span-12">
+      <div class="row"><strong>Recent Trace</strong></div>
+      <table>
+        <thead><tr><th>ts</th><th>user</th><th>q</th><th>latency</th><th>topk</th></tr></thead>
+        <tbody id="trace-tbody"><tr><td colspan="5" class="muted">—</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="card span-12">
+      <div class="row"><strong>Log Tail</strong></div>
+      <pre id="log-tail" class="small muted">—</pre>
+    </div>
+  </div>
+
+<script>
+async function safeJSON(url){
+  try{
+    const r = await fetch(url);
+    if(!r.ok) throw new Error(r.status + " " + r.statusText);
+    return await r.json();
+  }catch(e){
+    console.warn("fetch fail", url, e);
+    return null;
+  }
+}
+function fmtSecs(s){
+  const sec = Math.floor(s%60), min=Math.floor((s/60)%60), hr=Math.floor((s/3600)%24), d=Math.floor(s/86400);
+  const parts=[]; if(d) parts.push(d+"d"); if(hr) parts.push(hr+"h"); if(min) parts.push(min+"m"); parts.push(sec+"s");
+  return parts.join(" ");
+}
+function setText(id, t){ const el=document.getElementById(id); if(el) el.textContent = t; }
+function tagList(containerId, kv){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = "";
+  const entries = Object.entries(kv||{});
+  entries.forEach(([k,v])=>{
+    const span = document.createElement("span");
+    span.className = "tag";
+    span.textContent = `${k}=${v}`;
+    el.appendChild(span);
+  });
+}
+function fillTable(tbodyId, rows){
+  const tb = document.getElementById(tbodyId);
+  if(!tb) return;
+  tb.innerHTML = "";
+  if(!rows || !rows.length){
+    tb.innerHTML = `<tr><td colspan="99" class="muted">—</td></tr>`;
+    return;
+  }
+  rows.forEach((r,i)=>{
+    const tr = document.createElement("tr");
+    const cells = [
+      (i+1),
+      r.id ?? r.doc_id ?? "—",
+      r.title ?? "—",
+      (typeof r.score === "number" ? r.score.toFixed(3) : (r.score ?? "—")),
+    ];
+    cells.forEach(c=>{
+      const td = document.createElement("td");
+      td.textContent = String(c);
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+}
+function drawRouting(canvas, data){
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const entries = Object.entries(data || {}).sort((a,b)=>b[1]-a[1]);
+  const n = entries.length || 1;
+  const maxV = Math.max(1, ...entries.map(e=>e[1]));
+  const pad = 24;
+  const barW = (canvas.width - pad*2) / n * 0.7;
+  const gap = (canvas.width - pad*2) / n * 0.3;
+  const baseY = canvas.height - pad;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.moveTo(pad, baseY+0.5); ctx.lineTo(canvas.width-pad, baseY+0.5); ctx.stroke();
+
+  entries.forEach(([k,v], i)=>{
+    const x = pad + i*(barW+gap);
+    const h = Math.round((v/maxV) * (canvas.height - pad*2));
+    const y = baseY - h;
+    ctx.fillStyle = 'rgba(121,184,255,0.85)';
+    ctx.fillRect(x, y, barW, h);
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.font = '12px ui-monospace, monospace';
+    const label = k;
+    ctx.save(); ctx.translate(x + barW/2, baseY + 14); ctx.rotate(-Math.PI/12);
+    ctx.textAlign = 'center'; ctx.fillText(label, 0, 0); ctx.restore();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.textAlign = 'center'; ctx.fillText(String(v), x + barW/2, y - 4);
+  });
+
+  const legend = document.getElementById('routing-legend');
+  legend.textContent = entries.length ? entries.map(e=>`${e[0]}:${e[1]}`).join(' · ') : "—";
+}
+
+async function loadAll(){
+  const status = await safeJSON("/status");
+  if(status){
+    setText("uptime", fmtSecs(status.uptime_sec || 0));
+    setText("app-name", status.app || "Mirror V4");
+    setText("scrolls", status.scrolls_loaded ?? "—");
+    setText("index-last", status.index_stats ? ("updated: " + (status.index_stats.updated_at || "—")) : "—");
+
+    const cad = status.cadence || {};
+    setText("cadence-rate", (cad.answers ?? 0) + " answers");
+    setText("cadence-pcts", `Traveler ${Math.round(cad.traveler_pct||0)}% · Guiding ${Math.round(cad.guiding_pct||0)}% · Symbols ${Math.round(cad.symbols_pct||0)}%`);
+
+    const gpu = status.gpu || {};
+    setText("gpu-count", gpu.count ?? 0);
+    setText("gpu-avg", (gpu.util_avg_pct != null ? (gpu.util_avg_pct+"% util") : "—"));
+
+    const env = status.env || {};
+    const envShow = {
+      REQUIRE_CITATION: env.REQUIRE_CITATION,
+      LLM_FALLBACK_MODE: env.LLM_FALLBACK_MODE,
+      MAX_SENTENCES: env.MAX_SENTENCES,
+      TEMPORAL_CONTEXT: env.TEMPORAL_CONTEXT,
+      SYMBOL_RESONANCE: env.SYMBOL_RESONANCE,
+      CONVERSATION_WEAVE: env.CONVERSATION_WEAVE,
+      USE_MEMORI: env.USE_MEMORI || "false"
+    };
+    tagList("env-tags", envShow);
+
+    setText("safeguards", JSON.stringify(status.safeguards || {}, null, 2));
+
+    const canvas = document.getElementById("routing-canvas");
+    drawRouting(canvas, status.requests || {});
+  }
+
+  // RAG hits
+  const rag = await safeJSON("/rag/last?limit=25");
+  if(rag && rag.items){
+    const hits = (rag.items[0]?.hits) || [];
+    fillTable("rag-tbody", hits);
+  }
+
+  // Memori status - hide entire card if disabled
+  const memoriCard = document.getElementById("memori-card");
+  const memori = await safeJSON("/memori/status");
+  if(memori){
+    if(memori.ok && memori.enabled){
+      // Memori is enabled - show the card
+      memoriCard.classList.remove("hidden");
+      setText("memori-status", "✅ Enabled");
+      setText("memori-details", `Namespace: ${memori.info?.namespace || "—"} | Session: ${memori.info?.session_id || "—"}`);
+    } else {
+      // Memori is disabled - hide the entire card
+      memoriCard.classList.add("hidden");
+    }
+  } else {
+    // Memori status unavailable - hide the card
+    memoriCard.classList.add("hidden");
+  }
+
+  // Trace
+  const trace = await safeJSON("/trace/recent?limit=20");
+  if(trace && trace.items){
+    const tb = document.getElementById("trace-tbody"); tb.innerHTML = "";
+    trace.items.forEach(it=>{
+      const tr = document.createElement("tr");
+      const ts = new Date((it.ts || Date.now())).toLocaleTimeString();
+      const cells = [ts, it.user || "—", (it.q || "—").slice(0,120), (it.latency_ms || 0) + " ms", it.topk ?? "—"];
+      cells.forEach(c=>{ const td=document.createElement("td"); td.textContent = String(c); tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  }
+
+  // Logs
+  const logs = await safeJSON("/logs/tail?lines=200");
+  if(logs && logs.lines){
+    setText("log-tail", logs.lines.slice(-40).join("\n") || "—");
+  }
+}
+
+loadAll();
+setInterval(loadAll, 4000);
+</script>
+</body>
+</html>
