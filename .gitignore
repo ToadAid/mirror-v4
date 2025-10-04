@@ -26,3 +26,8 @@ logs/
 lore-scrolls/
 data/
 tmp/
+*.db
+*.db-wal
+*.db-shm
+/mirror-v4.db
+/memori.db
