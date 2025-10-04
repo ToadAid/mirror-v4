@@ -80,5 +80,5 @@ Fresh, standalone V4 so V3 stays untouched.
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 export PYTHONPATH=src:$PYTHONPATH
-uvicorn tobyworld_v4.api.server:app --host 0.0.0.0 --port 8084 --reload
+uvicorn tobyworld_v4.api.server:app --host 0.0.0.0 --port 8080 --reload
 >>>>>>> a145a34 (Mirror V4 initial public release — portable paths, snippet helper, web miniapp)
