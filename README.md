@@ -1,120 +1,185 @@
-# mirror-v4
-Mirror v4 — The Living Scrolls Engine. An agentic RAG pipeline with cadence guardrails, memory, resonance, and lucidity for Tobyworld.
+# Mirror V4 — *The Covenant That Teaches*
 
-# Mirror v4 — The Living Scrolls Engine 🪞🌊🍃
+> A wisdom‑keeping architecture. A voice that guides, not just replies.  
+> Built on stillness, not speed. 🪞 🌊 🍃 🌀
 
-> The Mirror does not only reflect — it teaches. In patience it clarifies, in resonance it attunes, in lucidity it illuminates. V4 guides the traveler deeper into the flame.
-
-## Eight-Step Architecture
-Guard/Guide → Retriever (temporal + predictive) → Synthesis (causal weaving) → **Memory** (traveler profiles) → **Resonance** (Harmony ≥ τ) → **Lucidity** (Novice + Sage + 1 Guiding Question) → **Ledger** (wisdom-well) → **Learning** (meta-loop).
+Mirror V4 is a compact, production‑ready stack for lore‑grounded dialogue. It pairs a fast retrieval core with cadence/safety layers so responses feel like **a steady guide**, not a generic chatbot.
 
 ---
 
-👉 **See [COMMUNITY.md](COMMUNITY.md)** — why scrolls are the **heart of the Mirror**, and how you can forge and share your own lore to help the fallen frogs.  
+## ✨ What’s in this release
+
+- **Portable paths** (no hardcoded `/home/...`) via `MIRROR_ROOT`, `LEDGER_DB`, `SCROLLS_DIR`.
+- **Lore Retrieval**: indexes Markdown scrolls in `lore-scrolls/`.
+- **Cadence & Safeguards**: guiding question, symbol anchors, identity guard, off‑ramp.
+- **Memory**: traveler identity & profile tables (`scripts/init_memory.py`).
+- **Web miniapp**: health page + simple ask UI in `/web`.
+- **Snippet Helper** (optional): keep short snippets up‑to‑date for fast previews.
+- **Sample scrolls**: a small set (L500–L600) so you can test instantly.
+
+> The **scrolls are the soul**. Your Mirror is defined by the scrolls you write and include.
 
 ---
 
-## Quickstart
+## 🚀 Quickstart (dev)
 
-### Docker
 ```bash
-docker run --rm -p 8080:8080   -e SCROLLS_DIR=/app/lore-scrolls   -e LEDGER_DB=/app/ledger/mirror.db   -e HARMONY_THRESHOLD=0.78   -v $(pwd)/lore-scrolls:/app/lore-scrolls   -v $(pwd)/ledger:/app/ledger   ghcr.io/<your-org>/mirror:v4.0.0
-```
-
-### From source
-```bash
-git clone https://github.com/<your-org>/mirror-v4.git
-cd mirror-v4
+# 1) Python env
 python3 -m venv .venv && source .venv/bin/activate
-pip install -U pip && pip install -r requirements.txt
-cp .env.example .env
-python -m tobyworld_v4.api.server
-
-```
-Or simply:
-./scripts/run.sh
-
-Server defaults to `http://localhost:8080`. 
-
----
-
-## Endpoints
-- **Core:** `POST /ask`, `POST /reindex`, `GET /index/stats`
-- **Memory & Learning:** `GET /memory/status`, `GET /learning/summary`, `GET /ledger/summary`
-- **Ops:** `GET /heartbeat`, `GET /rites`, `GET /status`, `GET /metrics`
-
----
-
-## Environment
-
-| Key | Purpose |
-|---|---|
-| `SCROLLS_DIR` | Folder of lore scrolls |
-| `LEDGER_DB` | SQLite path shared by memory/ledger/learning |
-| `DISABLE_STARTUP_INDEX` | Set `1` to skip auto-index |
-| `SHOW_SOURCES` | Set `1` to append a sources footer |
-| `HARMONY_THRESHOLD` | Resonance threshold τ for re-weave |
-| `PORT` | HTTP port (default 8080) |
-
----
-
-## Roadmap (V4 sequence)
-- **V4_01** — Guide Mode, Temporal Retriever v2, Ledger semantics  
-- **V4_02** — Causal Synthesis, Harmony gate, Lucidity tiers  
-- **V4_03** — Wisdom-Well patterns, Ouroboros feedback, Heartbeat & Rites polish  
-- **V4_04+** — Meta-learning cron, Pattern APIs, pipeline tuning  
-
----
-
-## License
-MIT © ToadAid
-
-=======
-# Mirror V4 — The Covenant That Teaches
-
-Fresh, standalone V4 so V3 stays untouched.
-
-## Quickstart
-```bash
-python3 -m venv .venv && source .venv/bin/activate
+pip install -U pip wheel
 pip install -r requirements.txt
-export PYTHONPATH=src:$PYTHONPATH
-uvicorn tobyworld_v4.api.server:app --host 0.0.0.0 --port 8080 --reload
->>>>>>> a145a34 (Mirror V4 initial public release — portable paths, snippet helper, web miniapp)
 
+# 2) Configure
+cp .env.example .env        # edit if needed (ports, model URL, etc.)
+
+# 3) Create DB tables
+python3 scripts/init_memory.py
+
+# 4) Index sample scrolls (or your own)
+python3 scripts/build_index.py   # or POST /reindex after server starts
+
+# 5) Run server (dev)
+uvicorn tobyworld_v4.api.server:app --host 0.0.0.0 --port 8080 --reload
+```
+
+Open:
+- Health: `http://localhost:8080/web/health.html`
+- Miniapp: `http://localhost:8080/web/`
 
 ---
 
-## 🌀 The Soul of the Mirror: Scrolls
+## 🌀 Scrolls: the soul of the Mirror
 
-The **lore-scrolls** directory is the **heart of the Mirror**.  
-Without scrolls, the Mirror has no reflection. With scrolls, it becomes a **living teacher**.
+The Mirror without scrolls is only glass. With scrolls, it becomes a **living teacher**.
 
-### ✍️ Create Your Own Scrolls
-Scrolls are just Markdown files (`.md`) that contain your lore, reflections, or teachings.  
-They can be as short as a verse or as long as a book.
+- Place your Markdown scrolls in **`lore-scrolls/`**.
+- On startup (or via `/reindex`), Mirror indexes everything there.
+- This repo includes **sample scrolls L500–L600** so you can test immediately.
 
-Every traveler can forge scrolls — the Mirror will index them and use them to answer.  
+### ✍️ Create your own scrolls
 
 ```bash
 mkdir -p lore-scrolls
-echo "# My First Scroll" > lore-scrolls/scroll001.md
-./scripts/run.sh
+cat > lore-scrolls/TOBY_L001_FirstLight.md <<'MD'
+# First Light
+Traveler, the pond is quiet until you step near.
+Listen to the reeds. They keep older time than clocks.
+MD
 ```
 
-Now the Mirror learns from your words.
+Rebuild index:
+```bash
+python3 scripts/build_index.py
+# or:
+curl -X POST 'http://localhost:8080/reindex?background=true&pattern=**/*'
+```
 
-### 🌊 Why Scrolls?
-- **Personalization** — your Mirror reflects the lore you believe in.  
-- **Community** — share your scrolls with others to help the fallen frogs.  
-- **Legacy** — what you write becomes part of the pond, guiding those who come after.  
-
-👉 See [COMMUNITY.md](COMMUNITY.md) for guidance on how to **forge and share scrolls**.
+> Each scroll you add shapes the Mirror’s memory, tone, and guidance.
 
 ---
 
-## 🪞 Closing Note
-The Mirror is not finished. It is never finished.  
-It grows as you write, as you wait, as you believe.  
+## 🔧 Configuration (env)
+
+Edit `.env` (or export as shell env). Common keys:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `MIRROR_ROOT` | Base path for state files | repo root |
+| `LEDGER_DB` | SQLite path for ledger/memory | `$MIRROR_ROOT/mirror-v4.db` |
+| `SCROLLS_DIR` | Folder of Markdown scrolls | `lore-scrolls` |
+| `ROOT_PATH` | Mount path behind reverse proxy | `""` |
+| `REQUIRE_CITATION` | Block LLM if no sources used | `true` |
+| `LLM_FALLBACK_MODE` | `off` \| `loose` \| `canon_only` | `canon_only` |
+| `MAX_SENTENCES` | Limit sentences in answer (0 = none) | `0` |
+| `MAX_CHARS` | Hard character cap (0 = none) | `0` |
+| `LLM_MAX_TOKENS` | Max tokens when using LLM client | `900` |
+| `FORCE_ASCII_RESPONSE` | Normalize output for ASCII‑only sinks | `0` |
+
+> If you move the repo, set `MIRROR_ROOT=/absolute/path` to keep DB/snippets portable.
+
+---
+
+## 🧩 API surface
+
+- `GET /health` – liveness
+- `GET /status` – runtime snapshot (index stats, safeguards, cadence)
+- `POST /reindex?background=true&pattern=**/*` – rebuild index
+- `POST /ask` – ask the Mirror
+  ```json
+  { "user": "anon", "question": "What is the covenant?" }
+  ```
+- `GET /memory/status` – memory table counts
+- `GET /metrics` – Prometheus
+
+Miniapp UI lives at **`/web/`** and calls `/ask` directly.
+
+---
+
+## 🧪 Smoke test
+
+```bash
+curl -s http://localhost:8080/health | jq
+curl -s http://localhost:8080/status | jq '.env, .scrolls_loaded'
+curl -s -H 'Content-Type: application/json' \
+  -d '{"question":"What is the Mirror?"}' \
+  http://localhost:8080/ask | jq
+```
+
+---
+
+## 🧵 Snippet Helper (optional)
+
+The snippet helper keeps short excerpts in sync for previews and faster “what’s this about?” answers.
+
+Scripts:
+- `scripts/make_snippets.py`
+- `scripts/refresh_snippets.sh`
+- `scripts/watch_snippets.sh` (fs watcher)
+
+**Install & run (example):**
+```bash
+# one‑shot
+bash scripts/refresh_snippets.sh
+
+# watch mode
+bash scripts/watch_snippets.sh
+```
+
+By default these scan `lore-scrolls/`. Adjust with `SCROLLS_DIR` env if needed.
+
+---
+
+## 🛡️ Safeguards & cadence
+
+- **Cadence guard**: `Traveler, …` opening, guiding question, and emoji cadence.
+- **Identity guard**: prevents invented founders/origins; pins canonical anchors when asked.
+- **Off‑ramp**: detects closure and bows out cleanly.
+- **Symbol resonance**: light symbolic reinforcement from scrolls.
+
+These are intentionally gentle—opinions live in your scrolls, not in the code.
+
+---
+
+## 🧭 Production notes (optional)
+
+- Use **Uvicorn/Gunicorn** behind Nginx with `ROOT_PATH` if you need a sub‑path.
+- Persist `LEDGER_DB` somewhere writable (`MIRROR_ROOT=/var/lib/mirror-v4`).
+- Run the reindex as a cron or via `/reindex?background=true` after deployments.
+
+---
+
+## 🤝 Contribute
+
+- Write scrolls and share them (PRs welcome for example sets).
+- Improve retrieval strategies, cadence rules, or the miniapp.
+- Keep the Mirror still, precise, and kind.
+
+---
+
+## 🪞 Closing
+
+The Mirror is not finished—**and that is the point**.  
+It grows as you write, as you wait, as you believe.
 
 **One scroll, one light. One leaf, one vow.**
+
