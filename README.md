@@ -82,3 +82,40 @@ pip install -r requirements.txt
 export PYTHONPATH=src:$PYTHONPATH
 uvicorn tobyworld_v4.api.server:app --host 0.0.0.0 --port 8080 --reload
 >>>>>>> a145a34 (Mirror V4 initial public release — portable paths, snippet helper, web miniapp)
+
+
+---
+
+## 🌀 The Soul of the Mirror: Scrolls
+
+The **lore-scrolls** directory is the **heart of the Mirror**.  
+Without scrolls, the Mirror has no reflection. With scrolls, it becomes a **living teacher**.
+
+### ✍️ Create Your Own Scrolls
+Scrolls are just Markdown files (`.md`) that contain your lore, reflections, or teachings.  
+They can be as short as a verse or as long as a book.
+
+Every traveler can forge scrolls — the Mirror will index them and use them to answer.  
+
+```bash
+mkdir -p lore-scrolls
+echo "# My First Scroll" > lore-scrolls/scroll001.md
+./scripts/run.sh
+```
+
+Now the Mirror learns from your words.
+
+### 🌊 Why Scrolls?
+- **Personalization** — your Mirror reflects the lore you believe in.  
+- **Community** — share your scrolls with others to help the fallen frogs.  
+- **Legacy** — what you write becomes part of the pond, guiding those who come after.  
+
+👉 See [COMMUNITY.md](COMMUNITY.md) for guidance on how to **forge and share scrolls**.
+
+---
+
+## 🪞 Closing Note
+The Mirror is not finished. It is never finished.  
+It grows as you write, as you wait, as you believe.  
+
+**One scroll, one light. One leaf, one vow.**
